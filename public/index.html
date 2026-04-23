@@ -2,375 +2,169 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>MLB Picks Dashboard</title>
-  <style>
-    * { box-sizing: border-box; }
 
+  <style>
     body {
-      margin: 0;
       font-family: Arial, sans-serif;
-      background: #060d26;
+      background: #0b1020;
       color: #fff;
+      margin: 0;
       padding: 20px;
     }
 
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
     h1 {
-      margin: 0 0 8px;
-      color: #8cc8ff;
-      font-size: 42px;
-      line-height: 1.1;
-    }
-
-    .subtitle {
-      margin: 0 0 28px;
-      color: #cfd6e6;
-      font-size: 18px;
-      line-height: 1.5;
+      margin-top: 0;
+      color: #7dd3fc;
     }
 
     .topbar {
       display: flex;
-      gap: 14px;
+      gap: 10px;
       align-items: center;
+      margin-bottom: 20px;
       flex-wrap: wrap;
-      background: #0e1738;
-      border: 1px solid #1b295a;
-      border-radius: 22px;
-      padding: 18px;
-      margin-bottom: 22px;
     }
 
-    .topbar label {
-      font-size: 18px;
-      font-weight: 700;
-      color: #ffffff;
-    }
-
-    input[type="date"] {
-      background: #f7f8fb;
-      color: #111827;
+    input, button {
+      padding: 10px 12px;
+      border-radius: 10px;
       border: none;
-      border-radius: 16px;
-      padding: 16px 18px;
-      font-size: 16px;
-      min-width: 220px;
+      font-size: 14px;
+    }
+
+    input {
+      background: #fff;
+      color: #111;
     }
 
     button {
-      border: none;
-      border-radius: 16px;
-      padding: 16px 22px;
-      font-size: 16px;
-      font-weight: 700;
+      background: #2563eb;
       color: white;
-      background: linear-gradient(180deg, #3f6dff 0%, #2a54e8 100%);
       cursor: pointer;
-      box-shadow: 0 10px 20px rgba(42,84,232,.25);
-    }
-
-    button:hover {
-      filter: brightness(1.05);
-    }
-
-    .status-box,
-    .empty {
-      background: #0e1738;
-      border: 1px solid #1b295a;
-      border-radius: 20px;
-      padding: 18px 20px;
-      color: #d6deef;
-      margin-bottom: 18px;
-      font-size: 16px;
-      line-height: 1.5;
     }
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
-      gap: 18px;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 16px;
     }
 
     .card {
-      background: linear-gradient(180deg, #0b1433 0%, #09122d 100%);
-      border: 1px solid #1b295a;
-      border-radius: 24px;
-      padding: 22px;
-      box-shadow: 0 14px 36px rgba(0,0,0,.28);
+      background: #11182d;
+      border: 1px solid #1f2a44;
+      border-radius: 16px;
+      padding: 16px;
     }
 
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 8px 14px;
-      border: 2px solid rgba(255,255,255,0.25);
-      border-radius: 999px;
-      font-size: 14px;
-      font-weight: 700;
-      color: #f2f5fb;
-      margin-bottom: 16px;
-      background: rgba(255,255,255,0.03);
+    .pick {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 12px;
     }
 
-    .matchup {
-      font-size: 24px;
-      font-weight: 800;
-      line-height: 1.18;
-      margin-bottom: 16px;
-      color: #ffffff;
-    }
+    .high { background: rgba(34,197,94,.2); }
+    .medium { background: rgba(234,179,8,.2); }
+    .low { background: rgba(239,68,68,.2); }
 
-    .meta {
-      font-size: 15px;
-      line-height: 1.7;
-      color: #e4e9f4;
-      margin-bottom: 16px;
-    }
-
-    .meta strong {
-      color: #ffffff;
-    }
-
-    .analysis-btn {
-      margin: 6px 0 16px;
-    }
-
-    .pick-box {
-      margin-top: 8px;
-      padding: 18px 20px;
-      border-radius: 22px;
-      border: 3px solid;
-      font-size: 16px;
-      line-height: 1.75;
-      font-weight: 700;
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04);
-    }
-
-    .pick-high {
-      background: rgba(34, 197, 94, 0.14);
-      border-color: #4ade80;
-    }
-
-    .pick-medium {
-      background: rgba(234, 179, 8, 0.14);
-      border-color: #facc15;
-    }
-
-    .pick-low {
-      background: rgba(239, 68, 68, 0.14);
-      border-color: #f87171;
-    }
-
-    .notes {
-      margin-top: 16px;
-      color: #d3dbec;
-      font-size: 15px;
-      line-height: 1.65;
-    }
-
-    .notes div {
-      margin-bottom: 6px;
-    }
-
-    .footer-note {
-      margin-top: 24px;
-      color: #97a4c2;
-      font-size: 14px;
-    }
-
-    .loading {
-      color: #b8c4de;
-      font-size: 14px;
+    .section {
       margin-top: 10px;
+      padding: 10px;
+      background: #1a233a;
+      border-radius: 10px;
     }
 
-    @media (max-width: 640px) {
-      h1 {
-        font-size: 34px;
-      }
-
-      .matchup {
-        font-size: 21px;
-      }
-
-      .topbar {
-        padding: 16px;
-      }
-
-      input[type="date"], button {
-        width: 100%;
-      }
-    }
   </style>
 </head>
-<body>
-  <div class="container">
-    <h1>MLB Picks Dashboard</h1>
-    <p class="subtitle">Análisis automático de juegos MLB con picks y confianza.</p>
 
-    <div class="topbar">
-      <label for="date">Fecha:</label>
-      <input type="date" id="date" />
-      <button id="loadBtn">Cargar juegos</button>
+<body>
+
+<h1>MLB Picks Dashboard 🚀</h1>
+
+<div class="topbar">
+  <input type="date" id="date"/>
+  <button onclick="loadGames()">Cargar juegos</button>
+</div>
+
+<div id="games" class="grid"></div>
+
+<script>
+const dateInput = document.getElementById("date");
+const gamesContainer = document.getElementById("games");
+
+dateInput.value = new Date().toISOString().split("T")[0];
+
+function confidenceClass(confidence){
+  if(confidence === "alta") return "high";
+  if(confidence === "media") return "medium";
+  return "low";
+}
+
+async function loadGames(){
+  const date = dateInput.value;
+  gamesContainer.innerHTML = "Cargando...";
+
+  const res = await fetch(`/api/games?date=${date}`);
+  const data = await res.json();
+
+  gamesContainer.innerHTML = "";
+
+  data.games.forEach(game => {
+    const card = document.createElement("div");
+    card.className = "card";
+
+    card.innerHTML = `
+      <h3>⚾ ${game.awayTeam} vs ${game.homeTeam}</h3>
+      <p>${new Date(game.gameDate).toLocaleString()}</p>
+
+      <button onclick="analyzeGame(${game.gamePk}, '${date}', this)">
+        Analizar
+      </button>
+
+      <div class="result"></div>
+    `;
+
+    gamesContainer.appendChild(card);
+  });
+}
+
+async function analyzeGame(gamePk, date, btn){
+  const card = btn.closest(".card");
+  const result = card.querySelector(".result");
+
+  result.innerHTML = "Analizando...";
+
+  const res = await fetch(`/api/analyze/${gamePk}?date=${date}`);
+  const data = await res.json();
+
+  const a = data.analysis;
+
+  result.innerHTML = `
+    <div class="pick ${confidenceClass(a.confidence)}">
+      🔥 Pick: ${a.pick} <br>
+      📊 Confianza: ${a.confidence} <br>
+      📈 Probabilidad: ${a.home.modelWinPct > a.away.modelWinPct ? a.home.modelWinPct : a.away.modelWinPct}% 
     </div>
 
-    <div id="statusBox" class="status-box">Cargando interfaz...</div>
-    <div id="games" class="grid"></div>
+    <!-- RUN LINE -->
+    <div class="section">
+      ⚾ Run Line: ${a.runLine.pick} <br>
+      📊 Prob: ${a.runLine.coverProb}% <br>
+      📈 Confianza: ${a.runLine.confidence}
+    </div>
 
-    <p class="footer-note">Si no ves juegos, prueba otra fecha de temporada MLB.</p>
-  </div>
+    <!-- TEAM TOTALS -->
+    <div class="section">
+      🔥 ${a.away.team}: ${a.teamTotals.away.pick} (${a.teamTotals.away.probability}%)<br>
+      ❄️ ${a.home.team}: ${a.teamTotals.home.pick} (${a.teamTotals.home.probability}%)<br>
+      📊 Total proyectado: ${a.teamTotals.combinedProjectedTotal}
+    </div>
+  `;
+}
 
-  <script>
-    const dateInput = document.getElementById("date");
-    const gamesContainer = document.getElementById("games");
-    const statusBox = document.getElementById("statusBox");
-    const loadBtn = document.getElementById("loadBtn");
+loadGames();
+</script>
 
-    const today = new Date().toISOString().split("T")[0];
-    dateInput.value = today;
-
-    function confidenceClass(confidence) {
-      const c = (confidence || "").toLowerCase();
-      if (c.includes("alta") || c.includes("high")) return "pick-high";
-      if (c.includes("media") || c.includes("medium")) return "pick-medium";
-      return "pick-low";
-    }
-
-    function confidenceEmoji(confidence) {
-      const c = (confidence || "").toLowerCase();
-      if (c.includes("alta") || c.includes("high")) return "📊";
-      if (c.includes("media") || c.includes("medium")) return "⚖️";
-      return "⚠️";
-    }
-
-    function pickEmoji(confidence) {
-      const c = (confidence || "").toLowerCase();
-      if (c.includes("alta") || c.includes("high")) return "🔥";
-      if (c.includes("media") || c.includes("medium")) return "🟡";
-      return "🔴";
-    }
-
-    function scoreEmoji() {
-      return "⚾";
-    }
-
-    function probabilityEmoji() {
-      return "📈";
-    }
-
-    function escapeHtml(value) {
-      return String(value ?? "")
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-    }
-
-    async function loadGames() {
-      const date = dateInput.value;
-      statusBox.textContent = `Cargando juegos para ${date}...`;
-      gamesContainer.innerHTML = "";
-
-      try {
-        const res = await fetch(`/api/games?date=${date}`);
-        const data = await res.json();
-
-        if (!data.ok) {
-          statusBox.textContent = "La API respondió con error.";
-          gamesContainer.innerHTML = `<div class="empty">Error: ${escapeHtml(data.error || "No se pudo cargar")}</div>`;
-          return;
-        }
-
-        if (!data.games || !data.games.length) {
-          statusBox.textContent = "No se encontraron juegos para esa fecha.";
-          gamesContainer.innerHTML = `<div class="empty">No hay juegos disponibles en ${escapeHtml(date)}.</div>`;
-          return;
-        }
-
-        statusBox.textContent = `Se encontraron ${data.games.length} juegos para ${date}.`;
-
-        for (const game of data.games) {
-          const card = document.createElement("div");
-          card.className = "card";
-
-          const gameDate = game.gameDate
-            ? new Date(game.gameDate).toLocaleString()
-            : "N/D";
-
-          card.innerHTML = `
-            <div class="badge">⏺️ ${escapeHtml(game.status || "Scheduled")}</div>
-            <div class="matchup">${escapeHtml(game.awayTeam)} vs ${escapeHtml(game.homeTeam)}</div>
-            <div class="meta">
-              <strong>Hora:</strong> ${escapeHtml(gameDate)}<br>
-              <strong>ID juego:</strong> ${escapeHtml(game.gamePk)}<br>
-              <strong>Pitchers:</strong> ${escapeHtml(game.awayProbablePitcher || "N/D")} vs ${escapeHtml(game.homeProbablePitcher || "N/D")}
-            </div>
-            <button class="analysis-btn" data-gamepk="${game.gamePk}" data-date="${date}">Analizar juego</button>
-            <div class="result"></div>
-          `;
-
-          const btn = card.querySelector("button");
-          btn.addEventListener("click", () => analyzeGame(game.gamePk, date, btn));
-
-          gamesContainer.appendChild(card);
-        }
-      } catch (error) {
-        statusBox.textContent = "Error cargando juegos.";
-        gamesContainer.innerHTML = `<div class="empty">Error cargando juegos: ${escapeHtml(error.message)}</div>`;
-      }
-    }
-
-    async function analyzeGame(gamePk, date, button) {
-      const card = button.closest(".card");
-      const result = card.querySelector(".result");
-      button.textContent = "Volver a analizar";
-      result.innerHTML = "<div class='loading'>Analizando juego...</div>";
-
-      try {
-        const res = await fetch(`/api/analyze/${gamePk}?date=${date}`);
-        const data = await res.json();
-
-        if (!data.ok) {
-          result.innerHTML = `<div class="notes">Error: ${escapeHtml(data.error || "No se pudo analizar")}</div>`;
-          return;
-        }
-
-        const analysis = data.analysis || {};
-        const pick = analysis.pick || "N/D";
-        const confidence = analysis.confidence || "Baja";
-        const away = analysis.away || {};
-        const home = analysis.home || {};
-
-        const awayScore = Number(away.finalScore || 0).toFixed(2);
-        const homeScore = Number(home.finalScore || 0).toFixed(2);
-        const modelPct = Math.max(Number(away.modelWinPct || 0), Number(home.modelWinPct || 0)).toFixed(2);
-
-        result.innerHTML = `
-          <div class="pick-box ${confidenceClass(confidence)}">
-            <div>${pickEmoji(confidence)} <strong>Pick:</strong> ${escapeHtml(pick)}</div>
-            <div>${confidenceEmoji(confidence)} <strong>Confianza:</strong> ${escapeHtml(confidence)}</div>
-            <div>${scoreEmoji()} <strong>${escapeHtml(away.team || "Away")}:</strong> ${escapeHtml(awayScore)}</div>
-            <div>${scoreEmoji()} <strong>${escapeHtml(home.team || "Home")}:</strong> ${escapeHtml(homeScore)}</div>
-            <div>${probabilityEmoji()} <strong>Probabilidad modelo:</strong> ${escapeHtml(modelPct)}%</div>
-          </div>
-          <div class="notes">
-            ${(analysis.notes || []).map(n => `<div>${escapeHtml(n)}</div>`).join("")}
-          </div>
-        `;
-      } catch (error) {
-        result.innerHTML = `<div class="notes">Error analizando juego: ${escapeHtml(error.message)}</div>`;
-      }
-    }
-
-    loadBtn.addEventListener("click", loadGames);
-    loadGames();
-  </script>
 </body>
 </html>
