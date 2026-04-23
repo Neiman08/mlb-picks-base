@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MLB Picks Dashboard</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0b1020;
+      color: #ffffff;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      color: #7dd3fc;
+      font-size: 32px;
+    }
+
+    .subtitle {
+      margin: 0 0 24px;
+      color: #cbd5e1;
+    }
+
+    .topbar {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      background: #11182d;
+      border: 1px solid #1f2a44;
+      border-radius: 14px;
+      padding: 14px;
+    }
+
+    label {
+      font-weight: bold;
+      color: #e2e8f0;
+    }
+
+    input, button {
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: none;
+      font-size: 14px;
+    }
+
+    input {
+      background: #fff;
+      color: #111;
+    }
+
+    button {
+      background: #2563eb;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background: #1d4ed8;
+    }
+
+    .status-box {
+      margin: 0 0 20px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: #11182d;
+      border: 1px solid #1f2a44;
+      color: #cbd5e1;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      background: #11182d;
+      border: 1px solid #1f2a44;
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.25);
+    }
+
+    .matchup {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 8px;
+      color: #ffffff;
+    }
+
+    .meta {
+      font-size: 13px;
+      color: #cbd5e1;
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+
+    .pick {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 12px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .high { background: rgba(34,197,94,.15); border: 1px solid #22c55e; }
+    .medium { background: rgba(234,179,8,.15); border: 1px solid #eab308; }
+    .low { background: rgba(239,68,68,.15); border: 1px solid #ef4444; }
+
+    .small {
+      font-size: 12px;
+      color: #94a3b8;
+      margin-top: 8px;
+      line-height: 1.5;
+    }
+
+    .empty {
+      background: #11182d;
+      border: 1px solid #1f2a44;
+      border-radius: 16px;
+      padding: 20px;
+      color: #cbd5e1;
+    }
+
+    .footer-note {
+      margin-top: 24px;
+      font-size: 12px;
+      color: #94a3b8;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>MLB Picks Dashboard</h1>
+    <p class="subtitle">Análisis automático de juegos MLB con picks y confianza.</p>
+
+    <div class="topbar">
+      <label for="date">Fecha:</label>
+      <input type="date" id="date" />
+      <button id="loadBtn">Cargar juegos</button>
+    </div>
+
+    <div id="statusBox" class="status-box">Cargando interfaz...</div>
+    <div id="games" class="grid"></div>
+
+    <p class="footer-note">Si no ves juegos, prueba otra fecha de temporada MLB.</p>
+  </div>
+
+  <script>
+    const dateInput = document.getElementById("date");
+    const gamesContainer = document.getElementById("games");
+    const statusBox = document.getElementById("statusBox");
+    const loadBtn = document.getElementById("loadBtn");
+
+    const today = new Date().toISOString().split("T")[0];
+    dateInput.value = today;
+
+    function confidenceClass(confidence) {
+      const c = (confidence || "").toLowerCase();
+      if (c.includes("alta") || c.includes("high")) return "high";
+      if (c.includes("media") || c.includes("medium")) return "medium";
+      return "low";
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    async function loadGames() {
+      const date = dateInput.value;
+      statusBox.textContent = `Cargando juegos para ${date}...`;
+      gamesContainer.innerHTML = "";
+
+      try {
+        const res = await fetch(`/api/games?date=${date}`);
+        const data = await res.json();
+
+        if (!data.ok) {
+          statusBox.textContent = "La API respondió con error.";
+          gamesContainer.innerHTML = `<div class="empty">Error: ${escapeHtml(data.error || "No se pudo cargar")}</div>`;
+          return;
+        }
+
+        if (!data.games || !data.games.length) {
+          statusBox.textContent = "No se encontraron juegos para esa fecha.";
+          gamesContainer.innerHTML = `<div class="empty">No hay juegos disponibles en ${escapeHtml(date)}.</div>`;
+          return;
+        }
+
+        statusBox.textContent = `Se encontraron ${data.games.length} juegos para ${date}.`;
+
+        for (const game of data.games) {
+          const card = document.createElement("div");
+          card.className = "card";
+
+          const gameDate = game.gameDate
+            ? new Date(game.gameDate).toLocaleString()
+            : "N/D";
+
+          card.innerHTML = `
+            <div class="matchup">${escapeHtml(game.awayTeam)} vs ${escapeHtml(game.homeTeam)}</div>
+            <div class="meta">
+              <strong>Estado:</strong> ${escapeHtml(game.status || "N/D")}<br>
+              <strong>Hora:</strong> ${escapeHtml(gameDate)}<br>
+              <strong>ID juego:</strong> ${escapeHtml(game.gamePk)}<br>
+              <strong>Pitchers:</strong> ${escapeHtml(game.awayProbablePitcher || "N/D")} vs ${escapeHtml(game.homeProbablePitcher || "N/D")}
+            </div>
+            <button data-gamepk="${game.gamePk}" data-date="${date}">Analizar juego</button>
+            <div class="result"></div>
+          `;
+
+          const btn = card.querySelector("button");
+          btn.addEventListener("click", () => analyzeGame(game.gamePk, date, btn));
+
+          gamesContainer.appendChild(card);
+        }
+      } catch (error) {
+        statusBox.textContent = "Error cargando juegos.";
+        gamesContainer.innerHTML = `<div class="empty">Error cargando juegos: ${escapeHtml(error.message)}</div>`;
+      }
+    }
+
+    async function analyzeGame(gamePk, date, button) {
+      const card = button.closest(".card");
+      const result = card.querySelector(".result");
+      result.innerHTML = "<div class='small'>Analizando juego...</div>";
+
+      try {
+        const res = await fetch(`/api/analyze/${gamePk}?date=${date}`);
+        const data = await res.json();
+
+        if (!data.ok) {
+          result.innerHTML = `<div class="small">Error: ${escapeHtml(data.error || "No se pudo analizar")}</div>`;
+          return;
+        }
+
+        const analysis = data.analysis || {};
+        const pick = analysis.pick || "N/D";
+        const confidence = analysis.confidence || "Baja";
+        const away = analysis.away || {};
+        const home = analysis.home || {};
+
+        const awayWinPct = Number(away.modelWinPct || 0);
+        const homeWinPct = Number(home.modelWinPct || 0);
+        const modelPct = Math.max(awayWinPct, homeWinPct).toFixed(2);
+
+        result.innerHTML = `
+          <div class="pick ${confidenceClass(confidence)}">
+            <strong>Pick:</strong> ${escapeHtml(pick)}<br>
+            <strong>Confianza:</strong> ${escapeHtml(confidence)}<br>
+            <strong>${escapeHtml(away.team || "Away")}:</strong> ${escapeHtml(away.finalScore ?? "N/D")}<br>
+            <strong>${escapeHtml(home.team || "Home")}:</strong> ${escapeHtml(home.finalScore ?? "N/D")}<br>
+            <strong>Probabilidad modelo:</strong> ${escapeHtml(modelPct)}%
+          </div>
+          <div class="small">
+            ${(analysis.notes || []).map(n => escapeHtml(n)).join("<br>")}
+          </div>
+        `;
+      } catch (error) {
+        result.innerHTML = `<div class="small">Error analizando juego: ${escapeHtml(error.message)}</div>`;
+      }
+    }
+
+    loadBtn.addEventListener("click", loadGames);
+    loadGames();
+  </script>
+</body>
+</html>
