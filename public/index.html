@@ -82,7 +82,7 @@
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
       gap: 16px;
     }
 
@@ -95,17 +95,18 @@
     }
 
     .matchup {
-      font-size: 18px;
+      font-size: 20px;
       font-weight: bold;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
       color: #ffffff;
+      line-height: 1.25;
     }
 
     .meta {
       font-size: 13px;
       color: #cbd5e1;
       margin-bottom: 12px;
-      line-height: 1.5;
+      line-height: 1.6;
     }
 
     .pick {
@@ -113,18 +114,38 @@
       padding: 12px;
       border-radius: 12px;
       font-size: 14px;
-      line-height: 1.6;
+      line-height: 1.7;
     }
 
     .high { background: rgba(34,197,94,.15); border: 1px solid #22c55e; }
     .medium { background: rgba(234,179,8,.15); border: 1px solid #eab308; }
     .low { background: rgba(239,68,68,.15); border: 1px solid #ef4444; }
 
+    .extra-box {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 12px;
+      background: #0f172a;
+      border: 1px solid #273449;
+      color: #dbe4f0;
+      line-height: 1.65;
+      font-size: 13px;
+    }
+
+    .extra-title {
+      font-weight: bold;
+      color: #7dd3fc;
+      margin-bottom: 8px;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: .3px;
+    }
+
     .small {
       font-size: 12px;
       color: #94a3b8;
       margin-top: 8px;
-      line-height: 1.5;
+      line-height: 1.6;
     }
 
     .empty {
@@ -141,35 +162,21 @@
       color: #94a3b8;
     }
 
-    .extra-box {
-      margin-top: 10px;
-      padding: 12px;
-      border-radius: 12px;
-      background: #0f172a;
-      border: 1px solid #273449;
-      font-size: 13px;
-      line-height: 1.6;
-      color: #dbe4f0;
-    }
-
-    .extra-title {
-      font-weight: bold;
-      color: #7dd3fc;
-      margin-bottom: 6px;
-      font-size: 13px;
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
-    }
-
     .row-space {
       margin-top: 6px;
+    }
+
+    .divider {
+      height: 1px;
+      background: #22304d;
+      margin: 10px 0;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>MLB Picks Dashboard</h1>
-    <p class="subtitle">Análisis automático de juegos MLB con picks y confianza.</p>
+    <h1>MLB Picks Dashboard 🚀</h1>
+    <p class="subtitle">Análisis automático de juegos MLB con picks, run line y team totals.</p>
 
     <div class="topbar">
       <label for="date">Fecha:</label>
@@ -246,7 +253,7 @@
             : "N/D";
 
           card.innerHTML = `
-            <div class="matchup">${escapeHtml(game.awayTeam)} vs ${escapeHtml(game.homeTeam)}</div>
+            <div class="matchup">⚾ ${escapeHtml(game.awayTeam)} vs ${escapeHtml(game.homeTeam)}</div>
             <div class="meta">
               <strong>Estado:</strong> ${escapeHtml(game.status || "N/D")}<br>
               <strong>Hora:</strong> ${escapeHtml(gameDate)}<br>
@@ -287,60 +294,74 @@
         const confidence = analysis.confidence || "Baja";
         const away = analysis.away || {};
         const home = analysis.home || {};
-        const runLine = analysis.runLine || {};
-        const teamTotals = analysis.teamTotals || {};
-        const awayTT = teamTotals.away || {};
-        const homeTT = teamTotals.home || {};
+        const runLine = analysis.runLine || null;
+        const teamTotals = analysis.teamTotals || null;
+        const awayTT = teamTotals?.away || null;
+        const homeTT = teamTotals?.home || null;
 
         const awayWinPct = Number(away.modelWinPct || 0);
         const homeWinPct = Number(home.modelWinPct || 0);
         const modelPct = Math.max(awayWinPct, homeWinPct).toFixed(2);
 
-        result.innerHTML = `
+        let html = `
           <div class="pick ${confidenceClass(confidence)}">
-            <strong>Pick:</strong> ${escapeHtml(pick)}<br>
-            <strong>Confianza:</strong> ${escapeHtml(confidence)}<br>
-            <strong>${escapeHtml(away.team || "Away")}:</strong> ${escapeHtml(away.finalScore ?? "N/D")}<br>
-            <strong>${escapeHtml(home.team || "Home")}:</strong> ${escapeHtml(home.finalScore ?? "N/D")}<br>
-            <strong>Probabilidad modelo:</strong> ${escapeHtml(modelPct)}%
-          </div>
-
-          <div class="extra-box">
-            <div class="extra-title">Run Line</div>
-            <strong>Pick:</strong> ${escapeHtml(runLine.pick || "N/D")}<br>
-            <strong>Probabilidad de cubrir:</strong> ${escapeHtml(formatNum(runLine.coverProb || 0))}%<br>
-            <strong>Margen proyectado:</strong> ${escapeHtml(formatNum(runLine.projectedMargin || 0))}<br>
-            <strong>Confianza:</strong> ${escapeHtml(runLine.confidence || "N/D")}
-          </div>
-
-          <div class="extra-box">
-            <div class="extra-title">Team Totals</div>
-
-            <div><strong>${escapeHtml(away.team || "Away")}:</strong> ${escapeHtml(awayTT.pick || "N/D")}</div>
-            <div class="row-space">
-              Línea: ${escapeHtml(formatNum(awayTT.line || 0, 1))} |
-              Proyección: ${escapeHtml(formatNum(awayTT.projectedRuns || 0))} |
-              Prob: ${escapeHtml(formatNum(awayTT.probability || 0))}% |
-              Confianza: ${escapeHtml(awayTT.confidence || "N/D")}
-            </div>
-
-            <div class="row-space"><strong>${escapeHtml(home.team || "Home")}:</strong> ${escapeHtml(homeTT.pick || "N/D")}</div>
-            <div class="row-space">
-              Línea: ${escapeHtml(formatNum(homeTT.line || 0, 1))} |
-              Proyección: ${escapeHtml(formatNum(homeTT.projectedRuns || 0))} |
-              Prob: ${escapeHtml(formatNum(homeTT.probability || 0))}% |
-              Confianza: ${escapeHtml(homeTT.confidence || "N/D")}
-            </div>
-
-            <div class="row-space">
-              <strong>Total combinado proyectado:</strong> ${escapeHtml(formatNum(teamTotals.combinedProjectedTotal || 0))}
-            </div>
-          </div>
-
-          <div class="small">
-            ${(analysis.notes || []).map(n => escapeHtml(n)).join("<br>")}
+            🔥 <strong>Pick:</strong> ${escapeHtml(pick)}<br>
+            📊 <strong>Confianza:</strong> ${escapeHtml(confidence)}<br>
+            ⚾ <strong>${escapeHtml(away.team || "Away")}:</strong> ${escapeHtml(formatNum(away.finalScore ?? "N/D"))}<br>
+            ⚾ <strong>${escapeHtml(home.team || "Home")}:</strong> ${escapeHtml(formatNum(home.finalScore ?? "N/D"))}<br>
+            📈 <strong>Probabilidad modelo:</strong> ${escapeHtml(modelPct)}%
           </div>
         `;
+
+        if (runLine && runLine.pick) {
+          html += `
+            <div class="extra-box">
+              <div class="extra-title">📉 Run Line</div>
+              <strong>Pick:</strong> ${escapeHtml(runLine.pick)}<br>
+              <strong>Probabilidad de cubrir:</strong> ${escapeHtml(formatNum(runLine.coverProb))}%<br>
+              <strong>Margen proyectado:</strong> ${escapeHtml(formatNum(runLine.projectedMargin))}<br>
+              <strong>Confianza:</strong> ${escapeHtml(runLine.confidence || "N/D")}
+            </div>
+          `;
+        }
+
+        if (teamTotals && awayTT && homeTT) {
+          html += `
+            <div class="extra-box">
+              <div class="extra-title">📊 Team Totals</div>
+
+              <div><strong>🏟️ ${escapeHtml(away.team || "Away")}:</strong> ${escapeHtml(awayTT.pick || "N/D")}</div>
+              <div class="row-space">
+                Línea: ${escapeHtml(formatNum(awayTT.line, 1))} |
+                Proyección: ${escapeHtml(formatNum(awayTT.projectedRuns))} |
+                Prob: ${escapeHtml(formatNum(awayTT.probability))}% |
+                Confianza: ${escapeHtml(awayTT.confidence || "N/D")}
+              </div>
+
+              <div class="divider"></div>
+
+              <div><strong>🏟️ ${escapeHtml(home.team || "Home")}:</strong> ${escapeHtml(homeTT.pick || "N/D")}</div>
+              <div class="row-space">
+                Línea: ${escapeHtml(formatNum(homeTT.line, 1))} |
+                Proyección: ${escapeHtml(formatNum(homeTT.projectedRuns))} |
+                Prob: ${escapeHtml(formatNum(homeTT.probability))}% |
+                Confianza: ${escapeHtml(homeTT.confidence || "N/D")}
+              </div>
+
+              <div class="divider"></div>
+
+              <div><strong>➕ Total combinado proyectado:</strong> ${escapeHtml(formatNum(teamTotals.combinedProjectedTotal))}</div>
+            </div>
+          `;
+        }
+
+        html += `
+          <div class="small">
+            ${(analysis.notes || []).map(n => `• ${escapeHtml(n)}`).join("<br>")}
+          </div>
+        `;
+
+        result.innerHTML = html;
       } catch (error) {
         result.innerHTML = `<div class="small">Error analizando juego: ${escapeHtml(error.message)}</div>`;
       }
